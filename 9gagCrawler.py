@@ -7,60 +7,67 @@ import hashlib
 
 url = "https://9gag.com/search/?query=climate%20change"
 
-#page = requests.get(url)
-#print(page.text)
 driver = webdriver.Chrome(executable_path = r"C:\Users\Ellis\OneDrive\Restliche Dokumente, Rezepte, etc\_WS 22_23\VKW\Trummer\chromedriver.exe")
 driver.get(url)
-#print(driver.page_source)
 
 # scrolling
 last_height = driver.execute_script("return document.body.scrollHeight")
-#print(last_height)
+
+num_iterations = 1
+
+def get_creator_id(article): 
+    creator_id = article.find("a", class_ = "ui-post-creator__author")
+    return creator_id.contents[0]
+
+def get_header_text(article):
+    header_text = article.find("h2")
+    return header_text.contents[0]
+
+def get_img(article):
+    img_src = article.find("picture").find("img")
+    return img_src["src"]
+
+def download_img(img_url, img_path):
+    img = requests.get(img_url).content
+    with open(img_path, 'wb') as handler: 
+        handler.write(img)
+
+def get_checksum(img_path):
+    with open(img_path, 'rb') as handler:    
+        hash = hashlib.sha256()
+        while chunk := handler.read(1024):
+            hash.update(chunk)
+        return hash.hexdigest()
 
 def crawlData(articles):
-    #articles = soup.find_all("article")
     metadata = []
     for article in articles:
         article_meta = {}
         article_meta["id"] = article["id"]
         print("")
         print(article["id"])
+
         try:
-            creator_id = article.find("a", class_ = "ui-post-creator__author")
-            print(creator_id.contents[0])
-            article_meta["creatorID"] = creator_id.contents[0]
+            article_meta["creatorID"] = get_creator_id(article)
         except:
             print("no id")
             continue
+
         try:
-            header_text = article.find("h2")
-            print(header_text.contents[0])
-            article_meta["header_text"] = header_text.contents[0]
+            article_meta["header_text"] = get_header_text(article)
         except:
             print("no header")
             continue
+
         try:
-            picture = article.find("picture")
-            img = picture.find("img")
-            print(img["src"])
-            article_meta["imgSrc"] = img["src"]
-            img2 = requests.get(img["src"]).content
-            with open(f'images\{article["id"]}.jpg', 'wb') as handler: 
-                handler.write(img2)
-            with open(f'images\{article["id"]}.jpg', 'rb') as handler:    
-                hash = hashlib.sha256()
-                while chunk := handler.read(1024):
-                    hash.update(chunk)
-                article_meta["checksum"] = hash.hexdigest()
-                pass
+            article_meta["imgSrc"] = get_img(article)
         except:
             continue
-            #try:
-            #    video = article.find("div", class_ = "post-view video-post")
-            #    vid = video.find("video")
-            #    print("found video")
-            #except:
-            #    print("no img or video found")
+
+        img_path = f'images\{article["id"]}.jpg'
+        download_img(article_meta["imgSrc"], img_path)
+
+        article_meta["checksum"] = get_checksum(img_path)
 
         metadata.append(article_meta)
     return metadata
@@ -68,7 +75,7 @@ def crawlData(articles):
 all_meta = []       
 
 pause = 1.5
-for i in range(1):
+for i in range(num_iterations):
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
     time.sleep(pause)
     soup = BeautifulSoup(driver.page_source, "html.parser")
