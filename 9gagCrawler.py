@@ -39,6 +39,10 @@ def get_checksum(img_path):
             hash.update(chunk)
         return hash.hexdigest()
 
+def get_comment_count(article):
+    comment_count = article.find("a", class_ = "comment badge-evt").find("span")
+    return comment_count.contents[0]
+
 def crawlData(articles):
     metadata = []
     for article in articles:
@@ -57,6 +61,12 @@ def crawlData(articles):
             article_meta["header_text"] = get_header_text(article)
         except:
             print("no header")
+            continue
+
+        try:
+            article_meta["comment_count"] = get_comment_count(article)
+        except:
+            print("no comments")
             continue
 
         try:
