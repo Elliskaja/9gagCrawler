@@ -14,8 +14,8 @@ driver.get(url)
 #print(driver.page_source)
 
 # scrolling
-lastHeight = driver.execute_script("return document.body.scrollHeight")
-#print(lastHeight)
+last_height = driver.execute_script("return document.body.scrollHeight")
+#print(last_height)
 
 def crawlData(articles):
     #articles = soup.find_all("article")
@@ -26,16 +26,16 @@ def crawlData(articles):
         print("")
         print(article["id"])
         try:
-            creatorID = article.find("a", class_ = "ui-post-creator__author")
-            print(creatorID.contents[0])
-            article_meta["creatorID"] = creatorID.contents[0]
+            creator_id = article.find("a", class_ = "ui-post-creator__author")
+            print(creator_id.contents[0])
+            article_meta["creatorID"] = creator_id.contents[0]
         except:
             print("no id")
             continue
         try:
-            headerText = article.find("h2")
-            print(headerText.contents[0])
-            article_meta["headerText"] = headerText.contents[0]
+            header_text = article.find("h2")
+            print(header_text.contents[0])
+            article_meta["header_text"] = header_text.contents[0]
         except:
             print("no header")
             continue
@@ -65,7 +65,7 @@ def crawlData(articles):
         metadata.append(article_meta)
     return metadata
 
-allMeta = []       
+all_meta = []       
 
 pause = 1.5
 for i in range(1):
@@ -74,14 +74,14 @@ for i in range(1):
     soup = BeautifulSoup(driver.page_source, "html.parser")
     #print(soup)
     articles = soup.find_all("article")
-    allMeta += crawlData(articles)
-    newHeight = driver.execute_script("return document.body.scrollHeight")
-    if newHeight == lastHeight:
+    all_meta += crawlData(articles)
+    new_height = driver.execute_script("return document.body.scrollHeight")
+    if new_height == last_height:
         break
-    lastHeight = newHeight
-    #print(lastHeight)
+    last_height = new_height
+    #print(last_height)
 
-df = pd.DataFrame(allMeta)
+df = pd.DataFrame(all_meta)
 df.to_csv("imgData.csv")
 
 
