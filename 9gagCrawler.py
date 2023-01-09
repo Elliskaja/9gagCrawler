@@ -3,6 +3,7 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 import time
 import pandas as pd
+import hashlib
 
 url = "https://9gag.com/search/?query=climate%20change"
 
@@ -46,6 +47,11 @@ def crawlData(articles):
             img2 = requests.get(img["src"]).content
             with open(f'images\{article["id"]}.jpg', 'wb') as handler: 
                 handler.write(img2)
+            with open(f'images\{article["id"]}.jpg', 'rb') as handler:    
+                hash = hashlib.sha256()
+                while chunk := handler.read(1024):
+                    hash.update(chunk)
+                article_meta["checksum"] = hash.hexdigest()
                 pass
         except:
             continue
@@ -62,7 +68,7 @@ def crawlData(articles):
 allMeta = []       
 
 pause = 1.5
-for i in range(50):
+for i in range(1):
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
     time.sleep(pause)
     soup = BeautifulSoup(driver.page_source, "html.parser")
