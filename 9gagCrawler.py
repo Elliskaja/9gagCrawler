@@ -43,6 +43,14 @@ def get_comment_count(article):
     comment_count = article.find("a", class_ = "comment badge-evt").find("span")
     return comment_count.contents[0]
 
+def get_upvotes(article):
+    upvote_count = article.find("a", class_ = "up").find("span")
+    return upvote_count.contents[0]
+
+def get_downvotes(article):
+    downvote_count = article.find("a", class_ = "down").find("span")
+    return downvote_count.contents[0]
+
 def crawlData(articles):
     metadata = []
     for article in articles:
@@ -67,6 +75,18 @@ def crawlData(articles):
             article_meta["comment_count"] = get_comment_count(article)
         except:
             print("no comments")
+            continue
+
+        try:
+            article_meta["upvotes"] = get_upvotes(article)
+        except:
+            print("no upvotes")
+            continue
+
+        try:
+            article_meta["downvotes"] = get_downvotes(article)
+        except:
+            print("no downvotes")
             continue
 
         try:
