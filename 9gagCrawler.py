@@ -13,7 +13,7 @@ driver.get(url)
 # scrolling
 last_height = driver.execute_script("return document.body.scrollHeight")
 
-num_iterations = 1
+num_iterations = 55
 
 def get_creator_id(article): 
     creator_id = article.find("a", class_ = "ui-post-creator__author")
